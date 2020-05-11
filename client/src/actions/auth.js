@@ -9,6 +9,24 @@ import {
   AUTH_ERROR,
 } from "./types";
 
+export const loadUser = () => async (dispatch) => {
+  const token = localStorage.token;
+  if (token) {
+    setAuthToken(token);
+  }
+  try {
+    const user = await axios.get("/api/auth");
+    dispatch({
+      type: USER_LOADED,
+      payload: user,
+    });
+  } catch (err) {
+    dispatch({
+      type: AUTH_ERROR,
+    });
+  }
+};
+
 export const register = ({ name, email, password }) => async (dispatch) => {
   const config = {
     headers: {
@@ -23,7 +41,7 @@ export const register = ({ name, email, password }) => async (dispatch) => {
       payload: res.data,
     });
 
-    //dispatch(loadUser())
+    dispatch(loadUser());
   } catch (err) {
     console.log(err);
     const errors = err.response.data.errors;
