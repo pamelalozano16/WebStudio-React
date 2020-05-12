@@ -9,12 +9,11 @@ const Navbar = ({ isAuthenticated, logout }) => {
     <ul>
       <li>
         <Link to="/dashboard">
-          <i className="fas fa-user"></i>{" "}
           <span className="hide-sm">Dashboard</span>
         </Link>
       </li>
       <li>
-        <Link to="/dashboard">
+        <Link to="/my-profile">
           <i className="fas fa-user"></i>{" "}
           <span className="hide-sm">My Profile</span>
         </Link>
