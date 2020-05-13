@@ -1,13 +1,56 @@
-import React, { Fragment, useState } from "react";
+import React, { Fragment, useState, useEffect } from "react";
 import { connect } from "react-redux";
 import { Link, Redirect } from "react-router-dom";
 import PropTypes from "prop-types";
+import { loadUser, updateUser } from "../../actions/auth";
+import { setAlert } from "../../actions/alert";
 
-const MyProfile = () => {
+const MyProfile = ({
+  updateUser,
+  loadUser,
+  loading,
+  user,
+  isAuthenticated,
+  setAlert,
+}) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    password2: "",
+  });
+  const { email, name, password, password2 } = formData;
   const [displayChangePassword, toggleChangePassword] = useState(false);
 
-  const onChange = (e) => {};
-  const onSubmit = (e) => {};
+  useEffect(() => {
+    if (!isAuthenticated || user == null) {
+      loadUser();
+      return <Redirect to="/login" />;
+    }
+    setFormData({
+      name: user.data.name,
+      email: user.data.email,
+    });
+  }, [loading]);
+
+  const onChange = (e) => {
+    loadUser();
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  const onSubmit = (e) => {
+    e.preventDefault();
+    if (!displayChangePassword) {
+      updateUser({ name, email });
+      setAlert("Tu información ha sido modificada", "success");
+    } else {
+      if (password !== password2) {
+        setAlert("Las contraseñas no coinciden", "danger");
+      } else {
+        updateUser({ name, email, password });
+        setAlert("Tu información ha sido modificada", "success");
+      }
+    }
+  };
   return (
     <Fragment>
       {" "}
@@ -18,7 +61,7 @@ const MyProfile = () => {
             type="text"
             placeholder="Name"
             name="name"
-            //    value={name}
+            value={name}
             onChange={(e) => onChange(e)}
             // required
           />
@@ -28,7 +71,7 @@ const MyProfile = () => {
             type="email"
             placeholder="Email Address"
             name="email"
-            // value={email}
+            value={email}
             onChange={(e) => onChange(e)}
             // required
           />
@@ -47,19 +90,9 @@ const MyProfile = () => {
             <div className="form-group">
               <input
                 type="password"
-                placeholder="Old password"
-                name="oldPassword"
-                //    value={oldPassword}
-                onChange={(e) => onChange(e)}
-                // required
-              />
-            </div>
-            <div className="form-group">
-              <input
-                type="password"
                 placeholder="New password"
                 name="password"
-                // value={password}
+                value={password}
                 onChange={(e) => onChange(e)}
                 // required
               />
@@ -69,7 +102,7 @@ const MyProfile = () => {
                 type="password"
                 placeholder="Repeat new password"
                 name="password2"
-                // value={password2}
+                value={password2}
                 onChange={(e) => onChange(e)}
                 // required
               />
@@ -82,4 +115,21 @@ const MyProfile = () => {
   );
 };
 
-export default MyProfile;
+MyProfile.propTypes = {
+  user: PropTypes.object.isRequired,
+  loading: PropTypes.object.isRequired,
+  isAuthenticated: PropTypes.bool,
+  loadUser: PropTypes.func.isRequired,
+  updateUser: PropTypes.func.isRequired,
+  setAlert: PropTypes.func.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  user: state.auth.user,
+  isAuthenticated: state.auth.isAuthenticated,
+  loading: PropTypes.object.isRequired,
+});
+
+export default connect(mapStateToProps, { loadUser, updateUser, setAlert })(
+  MyProfile
+);

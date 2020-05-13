@@ -130,24 +130,22 @@ router.patch(
     try {
       //See if user exists
       const info = req.body;
-      console.log(info);
+
       if (info.password) {
         //El salt son como los rounds de hashing que se
         //van a usar y 10 es lo recomendado en la doc
         const salt = await bcrypt.genSalt(10);
         //Guardas el hash del password
-        req.body.password = await bcrypt.hash(password, salt);
+        info.password = await bcrypt.hash(info.password, salt);
       }
       const user = await User.findByIdAndUpdate(req.user.id, info, {
         new: true,
-        runValidators: true,
       });
       //console.log(user);
       if (!user) {
         return res.status(404).send("Not found");
       }
 
-      console.log(user);
       //Guardas el user
       await user.save();
 
@@ -177,7 +175,7 @@ router.patch(
         }
       );
     } catch (err) {
-      // console.error(err.message);
+      console.error(err.message);
       res.status(400).send("Server error");
     }
   }
